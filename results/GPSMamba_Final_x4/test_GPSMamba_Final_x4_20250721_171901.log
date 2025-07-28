@@ -1,0 +1,222 @@
+2025-07-21 17:19:01,636 INFO: 
+  name: GPSMamba_Final_x4
+  model_type: MambaIRModel
+  scale: 4
+  num_gpu: 1
+  manual_seed: 10
+  datasets:[
+    test_1:[
+      name: results-A
+      type: PairedImageDataset
+      dataroot_gt: /home/usrs/hys/0010_Dataset/2024_0401_SPL/test/results-A/HR
+      dataroot_lq: /home/usrs/hys/0010_Dataset/2024_0401_SPL/test/results-A/LR_bicubic/X4
+      filename_tmpl: {}x4
+      io_backend:[
+        type: disk
+      ]
+      phase: test
+      scale: 4
+    ]
+    test_2:[
+      name: results-C
+      type: PairedImageDataset
+      dataroot_gt: /home/usrs/hys/0010_Dataset/2024_0401_SPL/test/results-C/HR
+      dataroot_lq: /home/usrs/hys/0010_Dataset/2024_0401_SPL/test/results-C/LR_bicubic/X4
+      filename_tmpl: {}x4
+      io_backend:[
+        type: disk
+      ]
+      phase: test
+      scale: 4
+    ]
+    test_3:[
+      name: CVC15
+      type: PairedImageDataset
+      dataroot_gt: /home/usrs/hys/0010_Dataset/2024_0401_SPL/test/CVC10/CVC15_HR
+      dataroot_lq: /home/usrs/hys/0010_Dataset/2024_0401_SPL/test/CVC10/CVC15_LR/X4
+      filename_tmpl: {}
+      io_backend:[
+        type: disk
+      ]
+      phase: test
+      scale: 4
+    ]
+  ]
+  network_g:[
+    type: GPSMamba
+    upscale: 4
+    in_chans: 3
+    img_size: 64
+    img_range: 1.0
+    embed_dim: 174
+    d_state: 16
+    depths: [8, 8, 8, 8, 8, 8]
+    num_heads: [6, 6, 6, 6, 6, 6]
+    window_size: 16
+    inner_rank: 64
+    num_tokens: 128
+    convffn_kernel_size: 5
+    mlp_ratio: 2.0
+    upsampler: pixelshuffle
+    resi_connection: 1conv
+  ]
+  path:[
+    pretrain_network_g: /home/usrs/hys/GPSMamba/GPSMamba_model/net_g_x4_best.pth
+    strict_load_g: True
+    results_root: /var/autofs/home/hale/usrs/hys/GPSMamba/results/GPSMamba_Final_x4
+    log: /var/autofs/home/hale/usrs/hys/GPSMamba/results/GPSMamba_Final_x4
+    visualization: /var/autofs/home/hale/usrs/hys/GPSMamba/results/GPSMamba_Final_x4/visualization
+  ]
+  val:[
+    save_img: True
+    suffix: None
+    metrics:[
+      psnr:[
+        type: calculate_psnr
+        crop_border: 4
+        better: higher
+        test_y_channel: True
+      ]
+      mse:[
+        type: calculate_mse
+        crop_border: 4
+        better: lower
+        test_y_channel: True
+      ]
+      ssim:[
+        type: calculate_ssim
+        crop_border: 4
+        test_y_channel: True
+      ]
+    ]
+  ]
+  dist: False
+  rank: 0
+  world_size: 1
+  auto_resume: False
+  is_train: False
+
+2025-07-21 17:19:01,642 INFO: Dataset [PairedImageDataset] - results-A is built.
+2025-07-21 17:19:01,642 INFO: Number of test images in results-A: 22
+2025-07-21 17:19:01,648 INFO: Dataset [PairedImageDataset] - results-C is built.
+2025-07-21 17:19:01,648 INFO: Number of test images in results-C: 22
+2025-07-21 17:19:01,652 INFO: Dataset [PairedImageDataset] - CVC15 is built.
+2025-07-21 17:19:01,652 INFO: Number of test images in CVC15: 10
+2025-07-21 17:19:02,207 INFO: Network [GPSMamba] is created.
+2025-07-21 17:19:03,115 INFO: Network: GPSMamba, with parameters: 36,942,609
+2025-07-21 17:19:03,116 INFO: GPSMamba(
+  (conv_first): Conv2d(3, 174, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (patch_embed): PatchEmbed(
+    (norm): LayerNorm((174,), eps=1e-05, elementwise_affine=True)
+  )
+  (patch_unembed): PatchUnEmbed()
+  (layers): ModuleList(
+    (0-5): 6 x ASSB(
+      (patch_embed): PatchEmbed()
+      (patch_unembed): PatchUnEmbed()
+      (residual_group): BasicBlock(
+        dim=174, input_resolution=(64, 64), depth=8
+        (layers): ModuleList(
+          (0-7): 8 x AttentiveLayer(
+            (softmax): Softmax(dim=-1)
+            (lrelu): LeakyReLU(negative_slope=0.01)
+            (sigmoid): Sigmoid()
+            (norm1): LayerNorm((174,), eps=1e-05, elementwise_affine=True)
+            (norm2): LayerNorm((174,), eps=1e-05, elementwise_affine=True)
+            (norm3): LayerNorm((174,), eps=1e-05, elementwise_affine=True)
+            (norm4): LayerNorm((174,), eps=1e-05, elementwise_affine=True)
+            (wqkv): Linear(in_features=174, out_features=522, bias=True)
+            (win_mhsa): WindowAttention(
+              dim=174, window_size=(16, 16), num_heads=6, qkv_bias=True
+              (proj): Linear(in_features=174, out_features=174, bias=True)
+              (softmax): Softmax(dim=-1)
+            )
+            (assm): ASSM(
+              (freq_conv): Conv2d(174, 87, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (freq_gate): Sequential(
+                (0): AdaptiveAvgPool2d(output_size=1)
+                (1): Conv2d(87, 87, kernel_size=(1, 1), stride=(1, 1))
+                (2): Sigmoid()
+              )
+              (freq_proj): Linear(in_features=87, out_features=16, bias=True)
+              (selectiveScan): Selective_Scan()
+              (out_norm): LayerNorm((348,), eps=1e-05, elementwise_affine=True)
+              (act): SiLU()
+              (out_proj): Linear(in_features=348, out_features=174, bias=True)
+              (in_proj): Sequential(
+                (0): Conv2d(174, 348, kernel_size=(1, 1), stride=(1, 1))
+              )
+              (CPE): Sequential(
+                (0): Conv2d(348, 348, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=348)
+              )
+              (embeddingB): Embedding(128, 64)
+              (route): Sequential(
+                (0): Linear(in_features=174, out_features=58, bias=True)
+                (1): GELU(approximate='none')
+                (2): Linear(in_features=58, out_features=128, bias=True)
+                (3): LogSoftmax(dim=-1)
+              )
+            )
+            (convffn1): ConvFFN(
+              (fc1): Linear(in_features=174, out_features=348, bias=True)
+              (act): GELU(approximate='none')
+              (dwconv): dwconv(
+                (depthwise_conv): Sequential(
+                  (0): Conv2d(348, 348, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=348)
+                  (1): GELU(approximate='none')
+                )
+              )
+              (fc2): Linear(in_features=348, out_features=174, bias=True)
+            )
+            (convffn2): ConvFFN(
+              (fc1): Linear(in_features=174, out_features=348, bias=True)
+              (act): GELU(approximate='none')
+              (dwconv): dwconv(
+                (depthwise_conv): Sequential(
+                  (0): Conv2d(348, 348, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2), groups=348)
+                  (1): GELU(approximate='none')
+                )
+              )
+              (fc2): Linear(in_features=348, out_features=174, bias=True)
+            )
+            (embeddingA): Embedding(64, 16)
+          )
+        )
+      )
+      (conv): Conv2d(174, 174, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    )
+  )
+  (norm): LayerNorm((174,), eps=1e-05, elementwise_affine=True)
+  (conv_after_body): Conv2d(174, 174, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  (conv_before_upsample): Sequential(
+    (0): Conv2d(174, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): LeakyReLU(negative_slope=0.01, inplace=True)
+  )
+  (upsample): Upsample(
+    (0): Conv2d(64, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): PixelShuffle(upscale_factor=2)
+    (2): Conv2d(64, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (3): PixelShuffle(upscale_factor=2)
+  )
+  (conv_last): Conv2d(64, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+)
+2025-07-21 17:19:05,238 INFO: Loading GPSMamba model from /home/usrs/hys/GPSMamba/GPSMamba_model/net_g_x4_best.pth, with param key: [params].
+2025-07-21 17:19:05,965 INFO: Model [MambaIRModel] is created.
+2025-07-21 17:19:05,965 INFO: Testing results-A...
+2025-07-21 17:19:44,392 INFO: Validation results-A
+	 # psnr: 34.7421	Best: 34.7421 @ GPSMamba_Final_x4 iter
+	 # mse: 28.7269	Best: 28.7269 @ GPSMamba_Final_x4 iter
+	 # ssim: 0.8587	Best: 0.8587 @ GPSMamba_Final_x4 iter
+
+2025-07-21 17:19:44,392 INFO: Testing results-C...
+2025-07-21 17:20:20,269 INFO: Validation results-C
+	 # psnr: 35.4008	Best: 35.4008 @ GPSMamba_Final_x4 iter
+	 # mse: 22.9634	Best: 22.9634 @ GPSMamba_Final_x4 iter
+	 # ssim: 0.8756	Best: 0.8756 @ GPSMamba_Final_x4 iter
+
+2025-07-21 17:20:20,270 INFO: Testing CVC15...
+2025-07-21 17:20:37,847 INFO: Validation CVC15
+	 # psnr: 40.5474	Best: 40.5474 @ GPSMamba_Final_x4 iter
+	 # mse: 6.2681	Best: 6.2681 @ GPSMamba_Final_x4 iter
+	 # ssim: 0.9503	Best: 0.9503 @ GPSMamba_Final_x4 iter
+
