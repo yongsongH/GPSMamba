@@ -1,0 +1,145 @@
+# general settings for image SR training
+name: GPSMamba_IRSR_ablation_x4
+model_type: MambaIRModel
+scale: 4
+num_gpu: auto
+manual_seed: 3407
+
+datasets:
+  train:
+    name: M3FD
+    type: PairedImageDataset
+    dataroot_gt: /home/usrs/hys/0010_Dataset/M3FD_Fusion_SR/M3FD_Fusion_train/lr/HR
+    dataroot_lq: /home/usrs/hys/0010_Dataset/M3FD_Fusion_SR/M3FD_Fusion_train/lr/LR_bicubic/X4
+    filename_tmpl: '{}x4'
+    io_backend:
+      type: disk
+
+
+    gt_size: 32
+    use_hflip: true
+    use_rot: true
+
+    # data loader
+    use_shuffle: true
+    num_worker_per_gpu: 4
+    batch_size_per_gpu: 32
+    dataset_enlarge_ratio: 100
+    prefetch_mode: ~
+
+  val_1:
+    name: results-A
+    type: PairedImageDataset
+    dataroot_gt: /home/usrs/hys/0010_Dataset/2024_0401_SPL/test/results-A/HR
+    dataroot_lq: /home/usrs/hys/0010_Dataset/2024_0401_SPL/test/results-A/LR_bicubic/X4
+    filename_tmpl: '{}x4'
+    io_backend:
+      type: disk
+      
+  val_2:
+    name: results-C
+    type: PairedImageDataset
+    dataroot_gt: /home/usrs/hys/0010_Dataset/2024_0401_SPL/test/results-C/HR
+    dataroot_lq: /home/usrs/hys/0010_Dataset/2024_0401_SPL/test/results-C/LR_bicubic/X4
+    filename_tmpl: '{}x4'
+    io_backend:
+      type: disk
+
+  val_3:
+    name: CVC10
+    type: PairedImageDataset
+    dataroot_gt: /home/usrs/hys/0010_Dataset/2024_0401_SPL/test/CVC10/CVC15_HR
+    dataroot_lq: /home/usrs/hys/0010_Dataset/2024_0401_SPL/test/CVC10/CVC15_LR/X4
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+
+
+network_g:
+  type: GPSMamba
+  upscale: 4
+  in_chans: 3
+  img_size: 64
+  img_range: 1.
+  embed_dim: 174
+  d_state: 16
+  depths: [8, 8, 8,8,8,8] 
+  num_heads: [6,6,6,6,6,6] 
+  window_size: 16
+  inner_rank: 64
+  num_tokens: 128
+  convffn_kernel_size: 5
+  mlp_ratio: 2.
+  upsampler: 'pixelshuffle'
+  resi_connection: '1conv'
+
+
+# path
+path:
+  pretrain_network_g: ~
+  strict_load_g: false
+  resume_state: ~
+
+# training settings
+train:
+  optim_g:
+    type: Adam
+    lr: !!float 2e-4
+    #lr: !!float 1e-3
+    weight_decay: 0
+    betas: [0.9, 0.99]
+
+  scheduler:
+    type: MultiStepLR
+    milestones: [250000, 400000, 450000, 475000]
+    #milestones: [5000, 10000, 15000, 20000，25000，30000，35000]
+    gamma: 0.5
+
+  total_iter: 500000
+  warmup_iter: -1  # no warm up
+
+  pixel_opt:
+    type: IRMambaLoss
+    loss_weight: 1.0      
+    freq_weight: 0.8      
+    phase_weight: 0.2    
+
+# validation settings
+val:
+  val_freq: !!float 5e3
+  save_img: false
+
+  metrics:
+    psnr: # metric name, can be arbitrary
+      type: calculate_psnr
+      crop_border: 4
+      better: higher
+      test_y_channel: true
+      
+    mse: # metric name, can be arbitrary
+      type: calculate_mse
+      crop_border: 4
+      better: lower
+      test_y_channel: true
+
+    ssim: # metric name, can be arbitrary
+      type: calculate_ssim
+      crop_border: 4
+      test_y_channel: true
+
+
+
+# logging settings
+logger:
+  print_freq: 200
+  save_checkpoint_freq: !!float 5e3
+  use_tb_logger: true
+  wandb:
+    project: ~
+    resume_id: ~
+
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500
