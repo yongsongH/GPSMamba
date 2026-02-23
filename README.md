@@ -1,11 +1,11 @@
 # [GPSMamba](https://arxiv.org/pdf/2507.18998)
-Official PyTorch implementation of the paper [GPSMamba: A Global Phase and Spectral Prompt-guided Mamba for Infrared Image Super-Resolution.](https://arxiv.org/pdf/2507.18998)
+Official PyTorch implementation of the paper [GPSMamba](https://arxiv.org/pdf/2507.18998)
 
 
 ## Introduction
 
-Infrared (IR) image super-resolution faces challenges from homogeneous background pixel distributions and sparse target regions, requiring models that effectively handle long-range dependencies and capture detailed local-global information. Recent advancements in Mamba-based (Selective Structured State Space Model) models, employing state space models, have shown significant potential in visual tasks, suggesting their applicability for IR enhancement. In this work, we introduce IRSRMamba: Infrared Image Super-Resolution via Mamba-based Wavelet Transform Feature Modulation Model, a novel Mamba-based model designed specifically for IR image super-resolution. This model enhances the restoration of context-sparse target details through its advanced dependency modeling capabilities. Additionally, a new wavelet transform feature modulation block improves multi-scale receptive field representation, capturing both global and local information efficiently. Comprehensive evaluations confirm that IRSRMamba outperforms existing models on multiple benchmarks. This research advances IR super-resolution and demonstrates the potential of Mamba-based models in IR image processing.
-
+ Infrared Image Super-Resolution (IRSR) is challenged by low-contrast, sparsely-textured data that demands robust global context modeling. While State-Space Models (SSMs) like Mamba offer efficient long-range dependency modeling, their intrinsic 1D causal scanning mechanism fragments the 2D image context, fundamentally limiting reconstruction fidelity. To address this, we present GPSMamba, a framework that systematically overcomes this limitation through a synergy of non-causal architectural prompting and global frequency-domain supervision. First, our Adaptive Semantic-Frequency State Space Module (ASF-SSM) embodies the non-causal prompting. It injects a dynamic prompt, derived from global frequency information, directly into the Mamba block. This breaks the rigid causal chain from within, enabling a non-causal, globally-aware state transition. Second, our Thermal-Spectral Attention and Phase Consistency (TSAPC) Loss provides explicit global supervision. Its thermal-spectral attention mechanism overcomes the limitations of patch-based scanning by selectively enforcing spectral fidelity on sparse thermal targets across non-adjacent patches. Through the synergy of these two innovations, extensive experimental results demonstrate that GPSMamba achieves state-of-the-art performance on benchmark IRSR datasets.
+ 
 ## Approach overview
 
 ![GPSMamba](experiments/pretrained_models/GPSMamba.png)
