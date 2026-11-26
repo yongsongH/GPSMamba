@@ -79,8 +79,8 @@ If you meet problems, please describe them and [contact](https://hyongsong.work/
 **Impolite or anonymous emails are not welcome. There may be some difficulties for me to respond to the email without self-introduce. Thank you for understanding.**
 
 ## Acknowledgement
-This work is under peer review.
-The updated manuscript and dataset will be released after the paper is accepted.
+This work has been accepted by IEEE Transactions on Geoscience and Remote Sensing (TGRS).
+The code is now publicly available. Enjoy!
 
 ---
 
